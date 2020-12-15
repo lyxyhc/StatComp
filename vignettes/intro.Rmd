@@ -1,0 +1,93 @@
+---
+title: "subgroup function"
+author: "Huicong Yu SA20229017(20050)"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{subgroup function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+__te__ is a simple R package developed to find subgroup from a data with dropout. Four functions are considered, namely , _MissingValue_ (determine whether the function contains missing values), _knn.im_ (use the method of knn to impute the missing value), _naive_ (a missing value processing method for deleting missing values) and _subgroup_ (find the subgroup by different intercept)
+
+## Benchmarking _MissingValue_ and _knn.im_ and _naive_ and _subgroup_
+
+The source R code for _MissingValue_ is as follows:
+```{r}
+MissingValue<-function(x){
+  x<-as.matrix(x)
+  m<-nrow(x)
+  test<-complete.cases(x)
+  n<-nrow(x[test,])
+  if(n!=m){
+    l<-1
+  }else{
+    l<-0
+  }
+  return(l)
+}
+```
+This function aim to determind whether there are missing values. 1 mean: have; 0 mean: NO.
+
+The source R code for _knn.im_ is as follows: 
+```{r}
+knn.im<-function(data,k){
+  return(knnImputation(data = data,k=k,scale=T,meth = "weighAvg"))
+}
+```
+If the previous function return 1, then we need to solve the data. This function chooses one method to imputa the missing values.
+
+The source R code for _naive_ is as follows:  
+```{r}
+naive<-function(data){
+  data<-as.data.frame(data)
+  data<-na.omit(data)
+  return(data)
+}
+```
+This function chooses to delete all data with missing values.
+
+The source R code for _subgroup_ is as follows:
+```{r}
+subgroup<-function(y,x,p,m,methods){
+  y<-as.matrix(y)
+  x<-as.matrix(x)
+  n<-nrow(y)
+  n2<-ncol(x)
+  if((n*p) != n2){
+    stop("Error in data:the length of x and y is different")
+  }
+  u<-numeric(n)
+  for (i in 1:n) {
+    y<-y[i,]
+    x<-x[,(p*i+1-p):(p*i)]
+    data<-cbind(y,x)
+    if(MissingValue(data)==1){
+      if(methods=="naive"){
+        data<-naive(data = data)
+      }else{
+        if(methods=="knn.im"){
+          data<-knn.im(data = data,k=10)
+        }else{
+          stop("Error:don't have this methods")
+        }
+      }
+      data<-as.matrix(data)
+      y<-data[,1]
+      x<-data[,-1]
+    }
+    fm<-lm(y~x)
+    u[i]<-coef(fm)[1]
+  }
+  u.unique<-unique(x)
+  for (j in 1:length(u.unique)) {
+    Group<-which(u==u.unique[j])
+    cat("Group",j,"individual",Group)
+  }
+  print(table(u))
+}
+```
+This function is for find different intercept: group the same intercepts into a subgroup. The length of return varable is the number of subgroup.

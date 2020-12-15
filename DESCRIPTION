@@ -1,0 +1,17 @@
+Package: StatComp20050
+Type: Package
+Title: subgroup
+Version: 1.0
+Date: 2020-12-15
+Author: Huicong Yu
+Maintainer: Huicong Yu <190861883@qq.com>
+Description: find the intercept of each individual,then cluster them according to different intercepts.
+License: GPL (>= 2)
+Imports: Rcpp (>= 1.0.5), microbenchmark, Ball, DAAG, MASS, RANN, boot, bootstrap, nloptr, GeneralizedHyperbolic, DMwR, energy
+Encoding: UTF-8
+LinkingTo: Rcpp
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.1.1
+URL: http://github.com/lyxyhc/StatComp
+BugReports: http://github.com/lyxyhc/StatComp/issues
